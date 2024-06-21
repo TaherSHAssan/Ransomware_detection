@@ -1,0 +1,244 @@
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import OneHotEncoder, LabelEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import classification_report, confusion_matrix
+
+# Load the dataset
+dataset = pd.read_csv('/content/drive/MyDrive/ECU_IoHT.csv')
+
+# Encoding the 'Type' column (target variable) to numerical values
+label_encoder = LabelEncoder()
+dataset['Type_encoded'] = label_encoder.fit_transform(dataset['Type'])
+
+# Selecting features and target variable
+X = dataset[['Protocol', 'Length']]
+y = dataset['Type_encoded']
+
+# Preprocessing: One-hot encoding for categorical data (Protocol)
+
+
+# Creating a pipeline with preprocessing and the logistic regression model
+
+
+# Splitting the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Training the model
+pipeline.fit(X_train, y_train)
+
+# Predicting and evaluating the model
+y_pred = pipeline.predict(X_test)
+report = classification_report(y_test, y_pred)
+conf_matrix = confusion_matrix(y_test, y_pred)
+
+# Printing the classification report and confusion matrix
+print(report)
+print(conf_matrix)
+
+from sklearn.metrics import roc_curve, roc_auc_score
+import matplotlib.pyplot as plt
+
+# Predict probabilities
+y_pred_prob = pipeline.predict_proba(X_test)[:, 1]
+
+# Calculate ROC curve
+fpr, tpr, thresholds = roc_curve(y_test, y_pred_prob)
+
+# Calculate AUC score
+roc_auc = roc_auc_score(y_test, y_pred_prob)
+
+# Plot ROC curve
+plt.figure()
+plt.plot(fpr, tpr, label='ROC curve (area = %0.2f)' % roc_auc)
+plt.plot([0, 1], [0, 1], 'k--')  # Dashed diagonal line
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('ROC Curve')
+plt.legend(loc="lower right")
+plt.show()
+
+# Define and fit the pipeline
+pipeline = Pipeline([
+    ('preprocessor', preprocessor),
+    ('classifier', LogisticRegression(max_iter=1000))
+])
+pipeline.fit(X_train, y_train)
+
+# Compute confusion matrix
+cm = confusion_matrix(y_test, pipeline.predict(X_test))
+
+# Plotting using seaborn
+plt.figure
+
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix
+from sklearn.pipeline import Pipeline
+from sklearn.linear_model import LogisticRegression
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder
+
+# Assuming your dataset is loaded into a variable called 'dataset'
+# and the relevant features and target are already selected in 'X' and 'y'
+
+# Define your preprocessor and pipeline with logistic regression
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('protocol', OneHotEncoder(handle_unknown='ignore'), ['Protocol'])
+    ], remainder='passthrough')
+
+pipeline = Pipeline([
+    ('preprocessor', preprocessor),
+    ('classifier', LogisticRegression(max_iter=1000))  # Increase max_iter
+])
+
+# Fit the model
+pipeline.fit(X_train, y_train)
+
+# Compute confusion matrix
+cm = confusion_matrix(y_test, pipeline.predict(X_test))
+
+# Plotting using seaborn
+plt.figure(figsize=(8, 6))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+plt.title('Confusion Matrix')
+plt.ylabel('Actual Label')
+plt.xlabel('Predicted Label')
+plt.show()
+
+pipeline = Pipeline([
+    ('preprocessor', preprocessor),
+    ('classifier', LogisticRegression(max_iter=1000))  # Increase max_iter
+])
+
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('protocol', OneHotEncoder(handle_unknown='ignore'), ['Protocol'])
+    ], remainder='passthrough')
+
+from sklearn.metrics import precision_recall_curve
+import matplotlib.pyplot as plt
+
+# Calculate precision and recall
+precision, recall, _ = precision_recall_curve(y_test, y_pred_prob)
+
+# Plot precision-recall curve
+plt.figure()
+plt.plot(recall, precision, marker='.')
+plt.title('Precision-Recall curve')
+plt.xlabel('Recall')
+plt.ylabel('Precision')
+plt.show()
+
+from sklearn.model_selection import learning_curve
+import numpy as np
+
+
+train_sizes, train_scores, test_scores = learning_curve(
+    pipeline, X, y, train_sizes=np.linspace(0.1, 1.0, 5), cv=10)
+
+# Calculate mean and standard deviation for train and test scores
+train_mean = np.mean(train_scores, axis=1)
+train_std = np.std(train_scores, axis=1)
+test_mean = np.mean(test_scores, axis=1)
+test_std = np.std(test_scores, axis=1)
+
+# Plot learning curves
+plt.figure()
+plt.plot(train_sizes, train_mean, 'o-', color="r", label="Training score")
+plt.plot(train_sizes, test_mean, 'o-', color="g", label="Cross-validation score")
+plt.fill_between(train_sizes, train_mean - train_std, train_mean + train_std, alpha=0.1, color="r")
+plt.fill_between(train_sizes, test_mean - test_std, test_mean + test_std, alpha=0.1, color="g")
+plt.title("Learning Curve")
+plt.xlabel("Training Set Size")
+plt.ylabel("Accuracy Score")
+plt.legend(loc="best")
+plt.show()
+
+plt.figure()
+plt.hist(y_pred_prob, bins=10, alpha=0.7, color='blue')
+plt.title('Histogram of Predicted Probabilities')
+plt.xlabel('Predicted Probability of Class 1')
+plt.ylabel('Frequency')
+plt.show()
+
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OneHotEncoder
+
+# Assuming 'Protocol' is the categorical feature
+categorical_features = ['Protocol']
+categorical_transformer = Pipeline(steps=[
+    ('onehot', OneHotEncoder(handle_unknown='ignore'))
+])
+
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('cat', categorical_transformer, categorical_features)
+    ], remainder='passthrough')
+
+# Apply the preprocessor to your data
+X_transformed = preprocessor.fit_transform(X)
+
+from sklearn.feature_selection import SelectKBest, f_classif
+
+# Assuming you want to select the top 2 features
+k = 3
+select_k_best = SelectKBest(f_classif, k=k)
+X_new = select_k_best.fit_transform(X_transformed, y)
+
+# To see which features were selected
+selected_features = select_k_best.get_support(indices=True)
+print("Selected features:", selected_features)
+
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report
+
+# Splitting the transformed data
+X_train, X_test, y_train, y_test = train_test_split(X_transformed, y, test_size=0.3, random_state=42)
+
+# KNN model
+knn = KNeighborsClassifier(n_neighbors=3)
+knn.fit(X_train, y_train)
+
+# Predictions and evaluation
+y_pred_knn = knn.predict(X_test)
+print(classification_report(y_test, y_pred_knn))
+
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+
+# Create KNN classifier
+knn = KNeighborsClassifier(n_neighbors=3)  # You can adjust the number of neighbors
+
+# Training the KNN model
+knn.fit(X_train, y_train)
+
+# Predicting the test set results
+y_pred_knn = knn.predict(X_test)
+
+# Evaluating the KNN model
+accuracy = accuracy_score(y_test, y_pred_knn)
+precision = precision_score(y_test, y_pred_knn, average='macro')
+recall = recall_score(y_test, y_pred_knn, average='macro')
+f1 = f1_score(y_test, y_pred_knn, average='macro')
+
+print(f"Accuracy: {accuracy}\nPrecision: {precision}\nRecall: {recall}\nF1 Score: {f1}")
+
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix
+
+# Convert encoded labels back to original class names
+class_names = label_encoder.inverse_transform(sorted(set(y_test)))
+
+# Calculate the confusion matrix
+conf_matrix = confusion_matrix(y_test, y_pred)
+
+# Create a heatmap using seaborn
+
